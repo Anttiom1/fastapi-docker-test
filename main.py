@@ -32,6 +32,7 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/checkconnection")
-async def read_root(db: Session = Depends(get_db)):
-    return {"message": "Connected to MySQL"}
+@app.get("/test-db")
+async def test_db(db: Session = Depends(get_db)):
+    result = db.execute("SELECT 1").fetchall()
+    return {"result": result}
