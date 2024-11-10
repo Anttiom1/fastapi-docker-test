@@ -1,9 +1,10 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi import FastAPI
+from databases import Database
 
 DB_USER = os.getenv("MYSQL_USER")
 DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
@@ -16,6 +17,8 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+
+database = Database(DATABASE_URL)
 
 app = FastAPI()
 
@@ -32,7 +35,12 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/test-db")
-async def test_db(db: Session = Depends(get_db)):
-    result = db.execute("SELECT 1").fetchall()
-    return {"result": result}
+@app.get("/healthcheck")
+async def health_check():
+    try:
+        # Attempt a simple connection without querying any tables
+        async with database.connection() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "Database connected successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database connection failed") from e
