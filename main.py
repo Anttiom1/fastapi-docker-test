@@ -1,46 +1,43 @@
+import contextlib
 from fastapi import Depends, FastAPI, HTTPException
 import os
+import mysql
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi import FastAPI
-from databases import Database
+from sqlalchemy.exc import SQLAlchemyError
+
 
 DB_USER = os.getenv("MYSQL_USER")
 DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
 DB_HOST = os.getenv("MYSQL_DATABASE")
 DB_NAME = os.getenv("MYSQL_DATABASE_NAME")
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-
-database = Database(DATABASE_URL)
-
 app = FastAPI()
 
+print(DB_USER)
 
 @app.get("/")
-def read_root():
+def read_roots():
     return {"message": "Hello, FastAPI!!!!!!!!!!"}
 
 
-def get_db():
-    db = SessionLocal()
+@app.get("/checkconnection")
+async def check_db():
     try:
-        yield db
-    finally:
-        db.close()
+        # Establish connection to the MySQL database
+        with mysql.connector.connect(user="root", database="db", password="salasana") as con:
+            with con.cursor() as cur:
+                # Execute a simple query to check the connection
+                cur.execute("SELECT 1")
+                result = cur.fetchone()  # Fetch the result of the query (just checking if we can fetch something)
+                if result:
+                    return {"message": "Database connection is successful!"}
+                else:
+                    raise HTTPException(status_code=500, detail="Database returned no result.")
+    except mysql.connector.Error as err:
+        # Handle any errors that occur during the connection
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {err}")
 
-@app.get("/healthcheck")
-async def health_check():
-    try:
-        # Attempt a simple connection without querying any tables
-        async with database.connection() as conn:
-            await conn.execute(text("SELECT 1"))
-        return {"status": "Database connected successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Database connection failed") from e
+
