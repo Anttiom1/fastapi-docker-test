@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi import FastAPI
 from sqlalchemy.exc import SQLAlchemyError
+import mysql.connector
 
 
 DB_USER = os.getenv("MYSQL_USER")
