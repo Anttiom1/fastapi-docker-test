@@ -28,7 +28,7 @@ def read_roots():
 async def check_db():
     try:
         # Establish connection to the MySQL database
-        with mysql.connector.connect(user="user", database="db", password="salasana") as con:
+        with mysql.connector.connect(host="192.168.0.16",user="user", database="db", password="salasana") as con:
             with con.cursor() as cur:
                 # Execute a simple query to check the connection
                 cur.execute("SELECT 1")
