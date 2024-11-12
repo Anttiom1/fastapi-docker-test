@@ -12,8 +12,8 @@ import mysql.connector
 
 DB_USER = os.getenv("MYSQL_USER")
 DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
-DB_HOST = os.getenv("MYSQL_DATABASE")
-DB_NAME = os.getenv("MYSQL_DATABASE_NAME")
+DB_HOST = os.getenv("MYSQL_DATABASE_HOST")
+DB = os.getenv("MYSQL_DATABASE")
 
 app = FastAPI()
 
@@ -28,7 +28,7 @@ def read_roots():
 async def check_db():
     try:
         # Establish connection to the MySQL database
-        with mysql.connector.connect(host="mysql", user="user", database="db", password="salasana") as con:
+        with mysql.connector.connect(host="DB_HOST", user="DB_USER", database="DB", password="DB_PASSWORD") as con:
             with con.cursor() as cur:
                 # Execute a simple query to check the connection
                 cur.execute("SELECT 1")
