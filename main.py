@@ -1,12 +1,8 @@
-import contextlib
-from fastapi import Depends, FastAPI, HTTPException
+
+from fastapi import FastAPI, HTTPException
 import os
 import mysql
-from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
 from fastapi import FastAPI
-from sqlalchemy.exc import SQLAlchemyError
 import mysql.connector
 
 
